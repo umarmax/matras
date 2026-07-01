@@ -171,8 +171,7 @@ function ContactButton() {
             background: 'var(--tg-theme-secondary-bg-color)',
             color: 'var(--tg-theme-text-color)',
           }}
-        >
-        📞 {t(lang, 'contact_us')}
+        >{t(lang, 'contact_us')}
         </motion.button>
       </section>
 
