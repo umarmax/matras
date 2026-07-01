@@ -190,40 +190,50 @@ function ContactButton() {
             />
             {/* Sheet */}
             <motion.div
-              initial={{ opacity: 0, y: 80 }}
+              initial={{ opacity: 0, y: 100 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 80 }}
+              exit={{ opacity: 0, y: 100 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed bottom-0 inset-x-0 z-50 mx-auto max-w-md rounded-t-3xl p-6"
-              style={{ background: 'var(--tg-theme-bg-color)' }}
+              className="fixed bottom-0 inset-x-0 z-50 mx-auto max-w-md rounded-t-3xl px-6 pt-6"
+              style={{ background: 'var(--tg-theme-bg-color)', paddingBottom: 'calc(var(--app-safe-bottom) + 80px)' }}
             >
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-semibold" style={{ color: 'var(--tg-theme-text-color)' }}>
+              {/* Handle bar */}
+              <div className="mx-auto mb-4 h-1 w-10 rounded-full" style={{ background: 'var(--tg-theme-hint-color)', opacity: 0.3 }} />
+
+              <div className="mb-5 flex items-center justify-between">
+                <h3 className="text-xl font-semibold" style={{ color: 'var(--tg-theme-text-color)' }}>
                   {t(lang, 'contact_us')}
                 </h3>
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-lg"
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-base"
                   style={{ background: 'var(--tg-theme-secondary-bg-color)', color: 'var(--tg-theme-hint-color)' }}
                 >
                   ✕
                 </button>
               </div>
 
-              {/* Phone call button */}
-              <a
-                href={`tel:${CONTACT_PHONE}`}
-                onClick={() => setOpen(false)}
-                className="mb-3 flex min-h-[56px] w-full items-center gap-4 rounded-2xl px-5 text-base font-semibold"
+              {/* Phone call button - use WebApp.openLink for Telegram WebView */}
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false)
+                  try {
+                    WebApp.openLink(`tel:${CONTACT_PHONE}`)
+                  } catch {
+                    window.location.href = `tel:${CONTACT_PHONE}`
+                  }
+                }}
+                className="mb-3 flex min-h-[64px] w-full items-center gap-4 rounded-2xl px-5"
                 style={{ background: 'var(--tg-theme-button-color)', color: 'var(--tg-theme-button-text-color)' }}
               >
                 <span className="text-2xl">📞</span>
-                <div>
-                  <div className="text-sm font-semibold">{t(lang, 'contact_us')}</div>
-                  <div className="text-xs opacity-80">{CONTACT_PHONE}</div>
+                <div className="text-left">
+                  <div className="text-base font-semibold">{CONTACT_PHONE}</div>
+                  <div className="text-xs opacity-75">{t(lang, 'contact_us')}</div>
                 </div>
-              </a>
+              </button>
 
               {/* Telegram button */}
               <button
@@ -236,17 +246,15 @@ function ContactButton() {
                     window.open(`https://t.me/${CONTACT_BOT}`, '_blank')
                   }
                 }}
-                className="flex min-h-[56px] w-full items-center gap-4 rounded-2xl px-5 text-base font-semibold"
+                className="flex min-h-[64px] w-full items-center gap-4 rounded-2xl px-5"
                 style={{ background: 'var(--tg-theme-secondary-bg-color)', color: 'var(--tg-theme-text-color)' }}
               >
                 <span className="text-2xl">✈️</span>
-                <div>
-                  <div className="text-sm font-semibold">Telegram</div>
-                  <div className="text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>@{CONTACT_BOT}</div>
+                <div className="text-left">
+                  <div className="text-base font-semibold">@{CONTACT_BOT}</div>
+                  <div className="text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>Telegram</div>
                 </div>
               </button>
-
-              <div style={{ height: 'calc(var(--app-safe-bottom) + 8px)' }} />
             </motion.div>
           </>
         )}
