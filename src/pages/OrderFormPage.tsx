@@ -22,10 +22,17 @@ export function OrderFormPage() {
   const lang = useSettingsStore((s) => s.language)
   const currency = useSettingsStore((s) => s.currency)
 
-  // Pre-fill from Telegram user or last saved order info
+  // Get Telegram user data directly from WebApp
   const tgUser = (() => {
     try { return WebApp.initDataUnsafe?.user } catch { return null }
   })()
+
+  // Get real telegram ID (from auth store or directly from WebApp)
+  const telegramUserId = user?.telegram_id && user.telegram_id !== 0
+    ? user.telegram_id
+    : tgUser?.id ?? undefined
+
+  const telegramUsername = user?.username ?? tgUser?.username ?? undefined
 
   const savedName = (() => {
     try { return localStorage.getItem('matras-last-name') ?? '' } catch { return '' }
@@ -86,8 +93,8 @@ export function OrderFormPage() {
             length: item.length,
             quantity: item.quantity,
           })),
-          telegram_user_id: user?.telegram_id,
-          telegram_username: user?.username ?? undefined,
+          telegram_user_id: telegramUserId,
+          telegram_username: telegramUsername,
           customer_name: name.trim(),
           customer_phone: phone.trim(),
           delivery_address: address.trim() || undefined,
