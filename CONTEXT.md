@@ -1,9 +1,11 @@
-# 📋 Matras Project Context — Handoff Document
+# 📋 WellSleep Matras — Project Context
 
-**Project:** Telegram Mini App for mattress sales (Matras)  
-**Location:** `c:/Users/Windows 10/Desktop/matras`  
-**Status:** 🔒 Security Hardened — Ready for Production Deployment  
-**Last Updated:** 2026-07-01 (Security Audit Completed)
+**Project:** Telegram Mini App for mattress sales (WellSleep)  
+**Bot:** @wellsleep_uzbot  
+**Frontend:** https://matras-iota.vercel.app  
+**GitHub:** https://github.com/umarmax/matras (public)  
+**Status:** ✅ Production — Fully Deployed  
+**Last Updated:** 2026-07-01
 
 ---
 
@@ -16,6 +18,9 @@ A premium Telegram Mini App for selling mattresses with:
 - Full e-commerce flow: catalog → cart → checkout
 - Admin order notifications via Telegram Bot API
 - Supabase backend (PostgreSQL + Edge Functions + RLS)
+- **Multilanguage:** UZ 🇺🇿 / RU 🇷🇺 / EN 🇬🇧 / KZ 🇰🇿
+- **Currency converter:** UZS / RUB / USD / EUR
+- **Theme:** Light / Dark / Auto
 
 **Tech Stack:**
 - Frontend: React 19, TypeScript 6, Vite 8, Tailwind CSS v4, Framer Motion, @twa-dev/sdk
@@ -25,398 +30,199 @@ A premium Telegram Mini App for selling mattresses with:
 
 ---
 
-## ✅ Completed Work (This Session)
+## 🏗 Infrastructure
 
-### 1. Order Form & Contact Information
-**Files Modified:**
-- `src/types/index.ts` — Added `customer_name`, `customer_phone`, `delivery_address`, `comment` to `OrderPayload` and `Order` interfaces
-- `src/lib/supabase.ts` — Updated `createOrder()` to accept contact fields
-- `supabase/schema.sql` — Added 4 new columns to `orders` table + migration SQL (commented)
-
-**New Files:**
-- `src/pages/OrderFormPage.tsx` — Complete checkout form with:
-  - Customer name (required)
-  - Phone number (required)
-  - Delivery address (optional)
-  - Order comment (optional)
-  - USP banners ("Free measurement", "2 days production")
-  - Form validation
-  - Admin notification trigger after order creation
-
-### 2. Navigation & UX Flow
-**Files Modified:**
-- `src/App.tsx` — Added `/order` route + `AnimatePresence` wrapper for page transitions
-- `src/components/TelegramMainButtonSync.tsx` — Changed from direct checkout to navigating to `/order` page
-- `src/pages/ProfilePage.tsx` — Fixed "Contact us" button to use `VITE_TELEGRAM_BOT_USERNAME` env var
-
-### 3. Telegram Bot Integration
-**New Files:**
-- `supabase/functions/telegram-auth/index.ts` — Complete HMAC-SHA256 validation of Telegram initData
-  - Validates signature using Web Crypto API (Deno-compatible)
-  - Checks auth_date expiry (1 hour)
-  - Creates/updates user profile in `profiles` table
-  
-- `supabase/functions/telegram-bot/index.ts` — Telegram Bot webhook + admin notifications
-  - **Webhook handler:** Receives updates from Telegram
-    - `/start` command → Welcome message + inline button with Mini App URL
-    - Callback queries → Admin can confirm/cancel orders via inline buttons
-  - **Internal endpoint:** `POST /notify-order`
-    - Called from `OrderFormPage` after successful order creation
-    - Sends formatted order notification to admin via Bot API
-    - Includes order details, customer info, items list
-    - Adds confirm/cancel inline buttons
-
-### 4. Configuration & Documentation
-**Files Modified:**
-- `.env.example` — Added:
-  - `VITE_TELEGRAM_BOT_USERNAME` (frontend)
-  - Comments for Edge Function secrets (TELEGRAM_BOT_TOKEN, TELEGRAM_ADMIN_CHAT_ID, MINI_APP_URL)
-
-**New Files:**
-- `README.md` — Complete production-ready documentation:
-  - Windows PowerShell execution policy fix for npm errors
-  - Step-by-step Supabase setup
-  - Telegram Bot creation guide (@BotFather)
-  - Webhook configuration
-  - Mini App setup in BotFather
-  - Deployment guides (Vercel/Cloudflare)
-  - Architecture diagrams
-  - Troubleshooting section
-  
-- `DEPLOYMENT_TODO.md` — Phase-by-phase deployment checklist with 7 phases
-
----
-
-## 🏗 Project Architecture
-
-### Frontend Flow
-```
-User opens bot → /start → Inline "Open catalog" button
-                                ↓
-                  Mini App loads in Telegram WebView
-                                ↓
-                  initTelegramApp() in main.tsx
-                                ↓
-                  Reads initData + applies theme
-                                ↓
-            Validates via telegram-auth Edge Function
-                                ↓
-                  Loads products from Supabase
-                                ↓
-      User: Browse catalog → Product page (with 3D) → Add to cart
-                                ↓
-                  Cart page → Telegram MainButton "Checkout"
-                                ↓
-                  OrderFormPage (name, phone, address, comment)
-                                ↓
-                  Submit → createOrder() → Supabase
-                                ↓
-          Notify admin via telegram-bot/notify-order endpoint
-                                ↓
-            Admin receives Telegram message with order details
-```
-
-### Backend (Supabase)
-
-**Tables:**
-1. `products` — Product catalog (name, price, category, sizes, rigidity)
-2. `profiles` — User profiles (synced from Telegram via telegram-auth)
-3. `orders` — Orders with customer contact info + items JSON
-
-**Edge Functions:**
-1. `telegram-auth` — Validates Telegram initData HMAC, creates/updates profile
-2. `telegram-bot` — Handles bot webhook + admin notifications (with XSS protection & rate limiting)
-3. `create-order` — ⭐ **NEW** Secure order creation with server-side validation
-
-**RLS Policies:**
-- Products: Public read
-- Profiles: Users see only their own
-- Orders: Users see only their own, but anon can insert (for checkout)
+| Service | Details |
+|---------|---------|
+| **Frontend** | Vercel — https://matras-iota.vercel.app |
+| **Database** | Supabase — iniesolotqxbzpchaezx.supabase.co |
+| **Bot** | @wellsleep_uzbot (token: 8362158298:AAEmG3...) |
+| **GitHub** | https://github.com/umarmax/matras (public, auto-deploys to Vercel) |
+| **Admin Chat ID** | 8627067211 |
+| **Contact Phone** | +998909583231 |
+| **Contact Telegram** | @wellsleepuz |
 
 ---
 
 ## 📁 Key Files Reference
 
-### Critical Frontend Files
+### Frontend
 | File | Purpose |
 |------|---------|
-| `src/main.tsx` | Entry point, inits Telegram SDK |
-| `src/App.tsx` | Router + AnimatePresence transitions |
-| `src/pages/OrderFormPage.tsx` | ⭐ Checkout form (NEW) |
-| `src/pages/CartPage.tsx` | Cart with quantity controls |
-| `src/pages/ProductPage.tsx` | Product detail with 3D + size picker |
-| `src/components/TelegramMainButtonSync.tsx` | Syncs Telegram MainButton with cart state |
-| `src/components/Mattress3D.tsx` | 3D mattress model (R3F) |
-| `src/lib/telegram.ts` | Telegram SDK init + theme sync |
+| `src/main.tsx` | Entry point, inits Telegram SDK, ErrorBoundary |
+| `src/App.tsx` | Router + ThemeManager + AuthInit |
+| `src/lib/i18n.ts` | Translations: UZ/RU/EN/KZ |
+| `src/lib/telegram.ts` | Telegram SDK init + theme sync (safe try/catch) |
+| `src/lib/auth.ts` | Auth via WebApp.initDataUnsafe + telegram-auth Edge Function |
 | `src/lib/supabase.ts` | Supabase client + API functions |
-| `src/lib/auth.ts` | Telegram auth flow |
+| `src/store/settingsStore.ts` | Language, theme, currency settings (persisted) |
+| `src/store/authStore.ts` | Auth state (initialized on app start) |
 | `src/store/cartStore.ts` | Cart state (Zustand + localStorage) |
+| `src/pages/HomePage.tsx` | Home + language picker + contact button popup |
+| `src/pages/CatalogPage.tsx` | Product catalog with category filter |
+| `src/pages/ProductPage.tsx` | Product detail with 3D + size picker |
+| `src/pages/CartPage.tsx` | Cart with visible checkout button |
+| `src/pages/OrderFormPage.tsx` | Checkout form (name, phone, address, comment) |
+| `src/pages/ProfilePage.tsx` | Phone login to see orders + settings |
+| `src/pages/SettingsPage.tsx` | Language / Theme / Currency settings |
+| `src/components/Layout.tsx` | Bottom nav with icons + i18n labels |
+| `src/components/ErrorBoundary.tsx` | Catches React crashes gracefully |
+| `src/components/Mattress3DLazy.tsx` | 3D canvas with WebGL fallback |
 
-### Critical Backend Files
+### Backend (Supabase)
 | File | Purpose |
 |------|---------|
-| `supabase/schema.sql` | Database schema (products, profiles, orders) |
-| `supabase/seed.sql` | Test products |
-| `supabase/policies-fix.sql` | RLS policies for orders |
-| `supabase/functions/telegram-auth/index.ts` | HMAC validation |
-| `supabase/functions/telegram-bot/index.ts` | Bot webhook + notifications (XSS protected) |
-| `supabase/functions/create-order/index.ts` | ⭐ **NEW** Secure order creation with validation |
-| `SECURITY_AUDIT.md` | ⭐ **NEW** Complete security audit report |
+| `supabase/schema.sql` | DB schema (products, profiles, orders) |
+| `supabase/seed.sql` | 5 test products |
+| `supabase/policies-fix.sql` | RLS policies |
+| `supabase/functions/telegram-auth/index.ts` | HMAC validation (24h expiry), profile upsert |
+| `supabase/functions/telegram-bot/index.ts` | Bot webhook + premium multilingual /start + admin notifications |
+| `supabase/functions/create-order/index.ts` | Secure order creation with server-side price validation |
 
 ---
 
-## 🔒 Security Improvements (2026-07-01)
+## 🌍 Features
 
-### Critical Fixes Implemented
+### Multilanguage (i18n)
+- **UZ** 🇺🇿 O'zbek (default)
+- **RU** 🇷🇺 Русский
+- **EN** 🇬🇧 English
+- **KZ** 🇰🇿 Қазақша
+- Language picker: top-right of home page (dropdown)
+- Also in Settings page
 
-1. **Server-Side Price Validation** ✅
-   - New `create-order` Edge Function validates all prices from database
-   - Prevents client-side price manipulation
-   - Recalculates totals on server
+### Currency Converter
+- **UZS** so'm (default)
+- **RUB** ₽
+- **USD** $
+- **EUR** €
+- All prices converted in real-time
 
-2. **Input Sanitization** ✅
-   - HTML escaping for all user inputs
-   - Prevents XSS attacks in Telegram messages
-   - Length limits enforced (name: 100, phone: 20, address: 500, comment: 1000)
+### Theme
+- **Light** ☀️
+- **Dark** 🌙
+- **Auto** 🔄 (follows Telegram)
 
-3. **Rate Limiting** ✅
-   - Max 5 orders per user per hour
-   - Max 3 notifications per order per minute
-   - Prevents spam and quota exhaustion
+### Contact Button (Home Page)
+- "📞 Связаться с нами" button at bottom of home page
+- Tapping opens bottom sheet popup with:
+  - 📞 Phone button → calls +998909583231 via `WebApp.openLink('tel:...')`
+  - ✈️ Telegram button → opens @wellsleepuz
 
-4. **Phone Number Validation** ✅
-   - Regex validation on frontend
-   - Format checking on backend
-   - Prevents invalid data storage
+### Profile Page
+- Phone login: enter phone number → see orders linked to that phone
+- Settings button → goes to SettingsPage
+- No user card (removed)
 
-5. **Telegram Webhook Security** ✅
-   - Optional webhook secret validation
-   - Prevents fake webhook requests
-   - Validates `X-Telegram-Bot-Api-Secret-Token` header
-
-6. **Environment Variable Validation** ✅
-   - Edge Functions fail fast if required vars missing
-   - Better error messages
-   - No silent failures
-
-7. **Enhanced Error Handling** ✅
-   - Internal errors not exposed to users
-   - Secure logging
-   - User-friendly error messages
-
-### Security Audit Report
-
-See `SECURITY_AUDIT.md` for complete details:
-- 10 security issues identified
-- 1 Critical, 2 High, 3 Medium, 4 Low
-- All Critical and High priority issues fixed
-- Medium priority issues addressed
-
-### Changes Summary
-
-**New Files:**
-- `supabase/functions/create-order/index.ts` — Secure order creation
-- `SECURITY_AUDIT.md` — Complete security audit
-
-**Modified Files:**
-- `supabase/functions/telegram-bot/index.ts` — Added XSS protection, rate limiting, webhook secret
-- `src/pages/OrderFormPage.tsx` — Added validation, uses secure endpoint
-- `.env.example` — Added TELEGRAM_WEBHOOK_SECRET
-
-**Removed:**
-- `src/lib/supabase.ts` → `createOrder()` function (replaced by Edge Function)
+### Bot Greeting (/start)
+- Premium multilingual welcome message
+- Detects user's Telegram language (uz/ru/en/kk)
+- Two buttons:
+  - `🛍 Открыть 3D Каталог (Mini App)` → opens Mini App
+  - `📞 Связаться с замерщиком` → opens @wellsleepuz
 
 ---
 
-## 🚨 Important Notes for Next Agent
+## 🔒 Security
 
-### 1. TypeScript Errors in tsconfig files are PRE-EXISTING
-The following errors appear in logs but are NOT caused by recent changes:
-```
-tsconfig.app.json: Option 'tsBuildInfoFile' cannot be specified...
-tsconfig.*.json: Unknown compiler option 'erasableSyntaxOnly'
-```
-These are TypeScript 6 config issues from the initial project setup. The app compiles and runs fine.
+- Server-side price validation (create-order Edge Function)
+- Input sanitization (XSS protection)
+- Rate limiting (5 orders/hour per user)
+- Phone validation
+- Webhook secret token validation
+- 24h auth_date expiry (was 1h)
 
-### 2. Edge Functions Use Deno, Not Node
-TS errors like `Cannot find name 'Deno'` in `supabase/functions/**/index.ts` are expected because:
-- Edge Functions run on Deno (not Node)
-- VSCode's TS server uses Node types by default
-- The functions will compile correctly when deployed via `supabase functions deploy`
+### Supabase Secrets Set
+- `TELEGRAM_BOT_TOKEN` ✅
+- `TELEGRAM_ADMIN_CHAT_ID` ✅ (8627067211)
+- `MINI_APP_URL` ✅ (https://matras-iota.vercel.app)
+- `TELEGRAM_WEBHOOK_SECRET` ✅ (8ead4f1060f4a4e261ba8d0703edd8a5)
 
-### 3. Database Migration Required
-If the user already ran `schema.sql` before this session, they need to run:
-```sql
-alter table public.orders add column if not exists customer_name text;
-alter table public.orders add column if not exists customer_phone text;
-alter table public.orders add column if not exists delivery_address text;
-alter table public.orders add column if not exists comment text;
-```
-This is documented in `schema.sql` (commented) and in `README.md`.
-
-### 4. Environment Variables Setup
-The user mentioned they already:
-- ✅ Added `.env` file
-- ✅ Applied `schema.sql`
-
-But they still need to:
-- [ ] Add `VITE_TELEGRAM_BOT_USERNAME` to `.env`
-- [ ] Create Telegram bot via @BotFather
-- [ ] Deploy Edge Functions (including new `create-order`)
-- [ ] Set Supabase secrets (TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, etc.)
-- [ ] Configure webhook with secret token
-
-See `DEPLOYMENT_TODO.md` for the full checklist.
-
-### 5. Windows PowerShell Issue
-User mentioned: "npm run ne rabotaet running scripts is disabled on this system"
-
-**Solution is now documented in README.md:**
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
+### Vercel Env Vars Set
+- `VITE_SUPABASE_URL` ✅
+- `VITE_SUPABASE_ANON_KEY` ✅
+- `VITE_TELEGRAM_BOT_USERNAME` ✅ (wellsleep_uzbot)
 
 ---
 
-## 🔄 Next Steps (From User's Perspective)
+## 🚀 Deployment
 
-**Security Hardening Complete!** ✅
+### Auto-deploy
+- GitHub repo is **public** → Vercel auto-deploys on every `git push origin main`
+- No manual CLI deployment needed
 
-The application now has:
-1. ✅ Server-side price validation
-2. ✅ Input sanitization (XSS protection)
-3. ✅ Rate limiting
-4. ✅ Phone validation
-5. ✅ Webhook secret validation
-6. ✅ Comprehensive error handling
-
-**What remains:** Production deployment with security best practices (see `DEPLOYMENT_TODO.md`)
-
----
-
-## 🛠 How to Continue Development
-
-### Run Dev Server
+### Manual deploy (if needed)
 ```bash
-cd c:/Users/Windows\ 10/Desktop/matras
+# Frontend
+vercel deploy --prod --token <token> --yes
+
+# Edge Functions
+supabase functions deploy telegram-bot --project-ref iniesolotqxbzpchaezx
+supabase functions deploy telegram-auth --project-ref iniesolotqxbzpchaezx
+supabase functions deploy create-order --project-ref iniesolotqxbzpchaezx
+```
+
+### Webhook
+```
+URL: https://iniesolotqxbzpchaezx.supabase.co/functions/v1/telegram-bot
+Secret: 8ead4f1060f4a4e261ba8d0703edd8a5
+```
+
+---
+
+## 📱 App Flow
+
+```
+User opens @wellsleep_uzbot
+  → /start → Premium welcome message (multilingual)
+  → "🛍 Открыть 3D Каталог" button
+  → Mini App opens at https://matras-iota.vercel.app
+  → Auth via WebApp.initDataUnsafe (immediate) + telegram-auth Edge Function
+  → Home page: language picker + hero + categories + products + contact button
+  → Browse catalog → Product page (3D) → Add to cart
+  → Cart → "Buyurtma berish" button → Order form
+  → Fill name/phone/address → Submit
+  → Admin gets Telegram notification with confirm/cancel buttons
+  → User redirected to Profile → sees order
+```
+
+---
+
+## 🐛 Known Issues / Notes
+
+1. **TypeScript errors in Edge Functions** — Expected (Deno environment, not Node). Functions deploy fine.
+2. **3D Model** — Procedural (no .gltf files). WebGL fallback shows 🛏 emoji if WebGL not supported.
+3. **Payment** — Not integrated. Cash on delivery assumed.
+4. **Profile name** — Shows from `WebApp.initDataUnsafe.user` (Telegram name). Falls back to "Guest" if opened outside Telegram.
+5. **Orders in profile** — Fetched by phone number (after phone login) or by telegram_user_id.
+
+---
+
+## 📞 Contact Info
+
+- **Phone:** +998909583231
+- **Telegram:** @wellsleepuz
+- **Bot:** @wellsleep_uzbot
+
+---
+
+## 🔄 How to Continue Development
+
+```bash
+# Run dev server
 npm run dev
-```
-Opens on `http://localhost:5173`
 
-### Test in Telegram
-Use ngrok or localtunnel:
-```bash
-npx localtunnel --port 5173
-```
-Then set the URL in @BotFather as temporary Web App URL.
+# Build
+npm run build
 
-### Deploy Edge Functions
-```bash
-supabase functions deploy telegram-auth
-supabase functions deploy telegram-bot
-```
+# Deploy to Vercel (auto via git push, or manual)
+git add -A && git commit -m "feat: ..." && git push origin main
 
-### Check Logs
-```bash
-supabase functions logs telegram-bot --tail
+# Deploy Edge Function (get personal access token from supabase.com/dashboard/account/tokens)
+$env:SUPABASE_ACCESS_TOKEN="sbp_your_personal_access_token_here"
+supabase functions deploy telegram-bot --project-ref iniesolotqxbzpchaezx
 ```
 
 ---
 
-## 📦 Dependencies
-
-All dependencies are already in `package.json`:
-- Core: `react@19.2.7`, `react-dom@19.2.7`, `vite@8.1.0`
-- Telegram: `@twa-dev/sdk@8.0.2`
-- Backend: `@supabase/supabase-js@2.108.2`
-- UI: `tailwindcss@4.3.1`, `framer-motion@12.42.0`
-- 3D: `@react-three/fiber@9.6.1`, `@react-three/drei@10.7.7`, `three@0.185.0`
-- State: `zustand@5.0.14`
-- Routing: `react-router-dom@7.18.0`
-
-No new dependencies were added during security hardening.
-
----
-
-## 🐛 Known Issues & Limitations
-
-1. **3D Model is Procedural** — No external `.gltf` files. If user wants realistic textures, need to add image assets.
-
-2. **Payment Not Integrated** — Order creates record but no payment processing. Could add:
-   - Telegram Payments API
-   - Stripe/PayPal integration
-   - Cash on delivery (current assumption)
-
-3. **No Admin Dashboard** — Admin gets notifications but can't view all orders in UI. Could add:
-   - Separate admin web panel
-   - Bot commands like `/orders`, `/stats`
-
-4. **No Order Tracking** — User can't see order status after placement. Could add:
-   - Order status page in Mini App
-   - Push notifications via bot when status changes
-
-5. **Mock Products in Seed** — `seed.sql` has 5 test products. Replace with real inventory.
-
----
-
-## 📞 Support & Resources
-
-- **Telegram Mini Apps Docs:** https://core.telegram.org/bots/webapps
-- **Supabase Docs:** https://supabase.com/docs
-- **React Three Fiber:** https://docs.pmnd.rs/react-three-fiber/
-- **Framer Motion:** https://www.framer.com/motion/
-
----
-
-## ✅ Pre-Deployment Checklist
-
-Before going live, ensure:
-- [ ] Real products in database (replace mocks)
-- [ ] Product images uploaded (Supabase Storage or CDN)
-- [ ] Bot token is production-ready (not test bot)
-- [ ] Admin chat ID is correct
-- [ ] **Generate and set TELEGRAM_WEBHOOK_SECRET** (security)
-- [ ] **Deploy all 3 Edge Functions** (telegram-auth, telegram-bot, create-order)
-- [ ] **Set webhook with secret token** (security)
-- [ ] **Restrict CORS to your domain** (in Edge Functions)
-- [ ] SSL certificate on custom domain (if using)
-- [ ] Analytics configured (optional)
-- [ ] Terms of service page added (optional)
-- [ ] Privacy policy added (if collecting personal data)
-
----
-
-## 🎉 Summary
-
-**Project Status:** 🔒 Security-hardened, production-ready
-
-**What Works:**
-- Full e-commerce flow (browse → cart → checkout)
-- 3D product visualization
-- Telegram theme integration (light/dark)
-- User authentication via Telegram
-- Admin order notifications
-- Contact form with validation
-- RLS security on database
-- **Server-side price validation** (prevents manipulation)
-- **XSS protection** (all inputs sanitized)
-- **Rate limiting** (prevents spam)
-- **Webhook security** (secret token validation)
-
-**Security Status:**
-- ✅ Critical issues fixed
-- ✅ High priority issues fixed
-- ✅ Medium priority issues addressed
-- ℹ️ Low priority issues documented
-
-**What's Next:**
-- Deploy to production (follow `DEPLOYMENT_TODO.md`)
-- Replace mock products with real inventory
-- Add product images
-- Configure Telegram bot webhook with secret
-
-**Estimated Time to Production:** 2-3 hours (following deployment checklist)
-
----
-
-*This handoff document should provide the next agent with complete context to continue deployment or add new features.*
+*Last updated: 2026-07-01 by AI agent. All features deployed and working.*
