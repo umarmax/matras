@@ -5,7 +5,8 @@ Telegram Mini App for a mattress factory (WellSleep) in Uzbekistan. Users can br
 
 **Live URL:** https://matras-iota.vercel.app  
 **GitHub:** https://github.com/umarmax/matras  
-**Bot Username:** @wellsleepuz
+**Bot Username:** @wellsleepuz  
+**Status:** ✅ Production — Fully Working
 
 ---
 
@@ -49,6 +50,7 @@ src/
 ├── components/
 │   ├── Mattress3DLazy.tsx  # Lazy-loaded 3D component
 │   ├── Layout.tsx          # Bottom nav, safe areas
+│   ├── ErrorBoundary.tsx   # Multilingual error handling
 │   └── ...
 └── data/
     └── products.ts      # Fallback static product data
@@ -68,23 +70,25 @@ supabase/
 
 ### Vercel (Frontend)
 ```
-VITE_SUPABASE_URL=https://xxx.supabase.co
+VITE_SUPABASE_URL=https://iniesolotqxbzpchaezx.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJ...
+VITE_TELEGRAM_BOT_USERNAME=wellsleepuz
 ```
 
 ### Supabase Edge Functions
 ```
 TELEGRAM_BOT_TOKEN=8362158298:AAEmG3WjGkslBvXfpMWrqLUvpvzm30TA1Dc
-TELEGRAM_ADMIN_CHAT_ID=<your_chat_id>
+TELEGRAM_ADMIN_CHAT_ID=8627067211
 MINI_APP_URL=https://matras-iota.vercel.app
-TELEGRAM_WEBHOOK_SECRET=<random_string>  # optional but recommended
 ```
 
 ---
 
 ## Telegram Bot Webhook Setup
 
-**Current Status:** Webhook is set but returning `401 Unauthorized` — the `TELEGRAM_WEBHOOK_SECRET` env var needs to be set in Supabase or the webhook needs to be re-registered without a secret.
+**Current Status:** ✅ Working
+
+**Important:** JWT verification must be **DISABLED** on the `telegram-bot` Edge Function in Supabase Dashboard for webhooks to work (Telegram doesn't send JWT tokens).
 
 ### Commands:
 
@@ -93,24 +97,12 @@ TELEGRAM_WEBHOOK_SECRET=<random_string>  # optional but recommended
 curl "https://api.telegram.org/bot<BOT_TOKEN>/getWebhookInfo"
 ```
 
-2. **Set webhook (with secret):**
+2. **Set webhook (no secret token):**
 ```bash
-curl -X POST "https://api.telegram.org/bot<BOT_TOKEN>/setWebhook" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "url": "https://iniesolotqxbzpchaezx.supabase.co/functions/v1/telegram-bot",
-    "secret_token": "<TELEGRAM_WEBHOOK_SECRET>"
-  }'
+curl -X POST "https://api.telegram.org/bot<BOT_TOKEN>/setWebhook?url=https://iniesolotqxbzpchaezx.supabase.co/functions/v1/telegram-bot"
 ```
 
-3. **Set webhook (without secret — simpler):**
-```bash
-curl -X POST "https://api.telegram.org/bot<BOT_TOKEN>/setWebhook" \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://iniesolotqxbzpchaezx.supabase.co/functions/v1/telegram-bot"}'
-```
-
-4. **Delete webhook (if needed):**
+3. **Delete webhook (if needed):**
 ```bash
 curl "https://api.telegram.org/bot<BOT_TOKEN>/deleteWebhook"
 ```
@@ -121,9 +113,16 @@ curl "https://api.telegram.org/bot<BOT_TOKEN>/deleteWebhook"
 
 | Command | Handler | Description |
 |---------|---------|-------------|
-| `/start` | `telegram-bot/index.ts` | Sends welcome message with Mini App button |
+| `/start` | `telegram-bot/index.ts` | Sends multilingual welcome message with Mini App button |
 | Callback: `confirm_order:<id>` | Same file | Admin confirms order |
 | Callback: `cancel_order:<id>` | Same file | Admin cancels order |
+
+### /start Message
+- Auto-detects user's Telegram language (uz/ru/en/kk)
+- Shows premium welcome message with contact info
+- Two inline buttons:
+  - "🛍 Open 3D Catalog" → opens Mini App
+  - "📞 Contact specialist" → opens @wellsleepuz
 
 ---
 
@@ -141,25 +140,26 @@ const lang = useSettingsStore((s) => s.language)
 
 ---
 
-## Recent Changes (July 2026)
+## Bundle Optimization
 
-1. **Bundle optimization** — Manual chunks in `vite.config.ts`:
-   - Main bundle: 680KB → 322KB
-   - 3D libs lazy-loaded separately
+Manual chunk splitting in `vite.config.ts`:
+- `react-vendor` — React + ReactDOM
+- `ui-vendor` — React Router + Framer Motion
+- `three-vendor` — Three.js core
+- `r3f-vendor` — React Three Fiber + Drei (lazy-loaded)
 
-2. **i18n fixes** — Removed hardcoded Russian strings from:
-   - CartPage, OrderFormPage, ProductPage, ErrorBoundary
-
-3. **Phone format** — Display: `+998 90 958 32 31`, tel: link: `+998909583231`
-
-4. **Contact button** — Removed phone emoji from "Contact Us" button
+**Result:** Main bundle reduced from **680KB → 322KB** (gzip: 198KB → 84KB)
 
 ---
 
-## Pending Tasks
+## Recent Changes (July 2026)
 
-- [ ] **Bot /start message** — User will provide custom message text
-- [ ] **Fix webhook 401** — Set `TELEGRAM_WEBHOOK_SECRET` in Supabase or re-register without secret
+1. **Bundle optimization** — Manual chunks in `vite.config.ts`
+2. **i18n fixes** — Removed hardcoded Russian strings from CartPage, OrderFormPage, ProductPage, ErrorBoundary
+3. **Phone format** — Display: `+998 90 958 32 31`, tel: link: `+998909583231`
+4. **Contact button** — Removed phone emoji from "Contact Us" button
+5. **Webhook fix** — Disabled JWT verification, re-registered webhook without secret token
+6. **Bot username** — Changed from @wellsleep_uzbot to @wellsleepuz
 
 ---
 
@@ -167,12 +167,31 @@ const lang = useSettingsStore((s) => s.language)
 
 **Frontend:** Push to `main` branch → Vercel auto-deploys
 
-**Edge Functions:** 
+**Edge Functions:** Deploy via Supabase Dashboard (recommended) or CLI:
 ```bash
 supabase functions deploy telegram-bot
 supabase functions deploy telegram-auth
 supabase functions deploy create-order
 ```
+
+**After deploying Edge Functions:** Make sure JWT verification is **disabled** on `telegram-bot` function.
+
+---
+
+## Troubleshooting
+
+### Bot not responding to /start
+1. Check webhook: `curl "https://api.telegram.org/bot<TOKEN>/getWebhookInfo"`
+2. If `last_error_message` shows "401 Unauthorized" → Disable JWT verification in Supabase Dashboard
+3. Re-register webhook if needed
+
+### 3D not loading
+- WebGL might not be supported → Falls back to 🛏 emoji
+- Check browser console for errors
+
+### Orders not appearing in admin chat
+- Verify `TELEGRAM_ADMIN_CHAT_ID` is set correctly in Supabase secrets
+- Check Edge Function logs in Supabase Dashboard
 
 ---
 
@@ -180,3 +199,8 @@ supabase functions deploy create-order
 
 - **Manager Telegram:** @wellsleepuz
 - **Phone:** +998 90 958 32 31
+- **Admin Chat ID:** 8627067211
+
+---
+
+*Last updated: 2026-07-01*
