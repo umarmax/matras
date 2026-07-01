@@ -150,7 +150,8 @@ function LanguagePicker() {
   )
 }
 
-const CONTACT_PHONE = '+998909583231'
+const CONTACT_PHONE = '+998909583231' // used for tel: link
+const CONTACT_PHONE_DISPLAY = '+998 90 958 32 31' // formatted for display
 const CONTACT_BOT = 'wellsleepuz'
 
 function ContactButton() {
@@ -230,7 +231,7 @@ function ContactButton() {
               >
                 <span className="text-2xl"></span>
                 <div className="text-left">
-                  <div className="text-base font-semibold">{CONTACT_PHONE}</div>
+                  <div className="text-base font-semibold">{CONTACT_PHONE_DISPLAY}</div>
                   <div className="text-xs opacity-75">{t(lang, 'contact_us')}</div>
                 </div>
               </button>

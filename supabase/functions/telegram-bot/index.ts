@@ -280,7 +280,7 @@ Deno.serve(async (req) => {
     const langCode = update.message.from?.language_code ?? 'ru'
 
     const MANAGER_USERNAME = 'wellsleepuz'
-    const MANAGER_PHONE = '+998909583231'
+    const MANAGER_PHONE = '+998 90 958 32 31'
 
     let greeting: string
     let btnCatalog: string
