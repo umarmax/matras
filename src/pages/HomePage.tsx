@@ -8,6 +8,7 @@ import { USPBanners } from '../components/USPBanners'
 import { useAppStore } from '../store/appStore'
 import { useSettingsStore, formatPrice } from '../store/settingsStore'
 import { t, LANGUAGES } from '../lib/i18n'
+import { WebApp } from '../lib/telegram'
 import type { Category } from '../types'
 
 function ProductsPreview() {
@@ -149,6 +150,111 @@ function LanguagePicker() {
   )
 }
 
+const CONTACT_PHONE = '+998909583231'
+const CONTACT_BOT = 'wellsleepuz'
+
+function ContactButton() {
+  const [open, setOpen] = useState(false)
+  const lang = useSettingsStore((s) => s.language)
+
+  return (
+    <>
+      {/* Contact us button */}
+      <section className="px-4 pb-6 pt-2">
+        <motion.button
+          type="button"
+          whileTap={{ scale: 0.98 }}
+          onClick={() => setOpen(true)}
+          className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl text-base font-semibold"
+          style={{
+            background: 'var(--tg-theme-secondary-bg-color)',
+            color: 'var(--tg-theme-text-color)',
+          }}
+        >
+          📞 {t(lang, 'contact_us')}
+        </motion.button>
+      </section>
+
+      {/* Popup overlay */}
+      <AnimatePresence>
+        {open && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40"
+              style={{ background: 'rgba(0,0,0,0.5)' }}
+              onClick={() => setOpen(false)}
+            />
+            {/* Sheet */}
+            <motion.div
+              initial={{ opacity: 0, y: 80 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 80 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed bottom-0 inset-x-0 z-50 mx-auto max-w-md rounded-t-3xl p-6"
+              style={{ background: 'var(--tg-theme-bg-color)' }}
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-semibold" style={{ color: 'var(--tg-theme-text-color)' }}>
+                  {t(lang, 'contact_us')}
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-lg"
+                  style={{ background: 'var(--tg-theme-secondary-bg-color)', color: 'var(--tg-theme-hint-color)' }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Phone call button */}
+              <a
+                href={`tel:${CONTACT_PHONE}`}
+                onClick={() => setOpen(false)}
+                className="mb-3 flex min-h-[56px] w-full items-center gap-4 rounded-2xl px-5 text-base font-semibold"
+                style={{ background: 'var(--tg-theme-button-color)', color: 'var(--tg-theme-button-text-color)' }}
+              >
+                <span className="text-2xl">📞</span>
+                <div>
+                  <div className="text-sm font-semibold">{t(lang, 'contact_us')}</div>
+                  <div className="text-xs opacity-80">{CONTACT_PHONE}</div>
+                </div>
+              </a>
+
+              {/* Telegram button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false)
+                  try {
+                    WebApp.openTelegramLink(`https://t.me/${CONTACT_BOT}`)
+                  } catch {
+                    window.open(`https://t.me/${CONTACT_BOT}`, '_blank')
+                  }
+                }}
+                className="flex min-h-[56px] w-full items-center gap-4 rounded-2xl px-5 text-base font-semibold"
+                style={{ background: 'var(--tg-theme-secondary-bg-color)', color: 'var(--tg-theme-text-color)' }}
+              >
+                <span className="text-2xl">✈️</span>
+                <div>
+                  <div className="text-sm font-semibold">Telegram</div>
+                  <div className="text-xs" style={{ color: 'var(--tg-theme-hint-color)' }}>@{CONTACT_BOT}</div>
+                </div>
+              </button>
+
+              <div style={{ height: 'calc(var(--app-safe-bottom) + 8px)' }} />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
+  )
+}
+
 export function HomePage() {
   const navigate = useNavigate()
 
@@ -166,6 +272,7 @@ export function HomePage() {
       <USPBanners />
       <CategoryList onSelect={handleCategorySelect} />
       <ProductsPreview />
+      <ContactButton />
     </Layout>
   )
 }
