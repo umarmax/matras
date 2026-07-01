@@ -22,7 +22,7 @@ export function CartPage() {
         title={t(lang, 'cart_title')}
         subtitle={
           items.length > 0
-            ? `${items.length} поз. · ${formatPrice(totalPrice, currency)}`
+            ? `${items.length} ${t(lang, 'items_count')} · ${formatPrice(totalPrice, currency)}`
             : t(lang, 'cart_empty')
         }
       />

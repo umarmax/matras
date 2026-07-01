@@ -110,6 +110,8 @@ export const translations = {
     val_comment_long: 'Izoh juda uzun (maks. 1000 belgi)',
     val_fix_errors: 'Iltimos, xatolarni to\'g\'rilang',
     cart_is_empty: 'Savat bo\'sh',
+    // Cart items count
+    items_count: 'ta',
   },
   ru: {
     // Nav
@@ -211,6 +213,8 @@ export const translations = {
     val_comment_long: 'Комментарий слишком длинный (макс. 1000 символов)',
     val_fix_errors: 'Пожалуйста, исправьте ошибки в форме',
     cart_is_empty: 'Корзина пуста',
+    // Cart items count
+    items_count: 'поз.',
   },
   en: {
     // Nav
@@ -312,6 +316,8 @@ export const translations = {
     val_comment_long: 'Comment is too long (max 1000 chars)',
     val_fix_errors: 'Please fix the errors in the form',
     cart_is_empty: 'Cart is empty',
+    // Cart items count
+    items_count: 'items',
   },
   kz: {
     // Nav
@@ -413,6 +419,8 @@ export const translations = {
     val_comment_long: 'Түсініктеме тым ұзын (макс. 1000 таңба)',
     val_fix_errors: 'Формадағы қателерді түзетіңіз',
     cart_is_empty: 'Себет бос',
+    // Cart items count
+    items_count: 'дана',
   },
 }
 

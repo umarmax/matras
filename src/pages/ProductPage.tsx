@@ -73,7 +73,7 @@ export function ProductPage() {
   if (!product) {
     return (
       <Layout>
-        <PageHeaderWithBack title="Товар не найден" onBack={() => navigate('/catalog')} />
+        <PageHeaderWithBack title={t(lang, 'no_products')} onBack={() => navigate('/catalog')} />
       </Layout>
     )
   }

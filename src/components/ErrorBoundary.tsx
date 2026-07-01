@@ -9,6 +9,25 @@ interface State {
   error: Error | null
 }
 
+// Read persisted language from Zustand localStorage key (no store access in class component)
+function getStoredLang(): string {
+  try {
+    const raw = localStorage.getItem('matras-settings')
+    if (raw) {
+      const parsed = JSON.parse(raw) as { state?: { language?: string } }
+      return parsed?.state?.language ?? 'ru'
+    }
+  } catch {}
+  return 'ru'
+}
+
+const ERROR_STRINGS: Record<string, { title: string; subtitle: string; reload: string }> = {
+  uz: { title: 'Nimadir noto\'g\'ri ketdi', subtitle: 'Ilovani qayta ishga tushirishga harakat qiling', reload: 'Qayta yuklash' },
+  ru: { title: 'Что-то пошло не так', subtitle: 'Попробуйте перезапустить приложение', reload: 'Перезагрузить' },
+  en: { title: 'Something went wrong', subtitle: 'Try restarting the app', reload: 'Reload' },
+  kz: { title: 'Бірдеңе дұрыс болмады', subtitle: 'Қолданбаны қайта іске қосып көріңіз', reload: 'Қайта жүктеу' },
+}
+
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
@@ -25,6 +44,9 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      const lang = getStoredLang()
+      const strings = ERROR_STRINGS[lang] ?? ERROR_STRINGS.ru
+
       return (
         <div
           style={{
@@ -42,10 +64,10 @@ export class ErrorBoundary extends Component<Props, State> {
         >
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>😔</div>
           <h2 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>
-            Что-то пошло не так / Something went wrong
+            {strings.title}
           </h2>
           <p style={{ fontSize: '14px', opacity: 0.6, marginBottom: '24px' }}>
-            Попробуйте перезапустить / Try restarting
+            {strings.subtitle}
           </p>
           {this.state.error && (
             <p style={{ fontSize: '12px', opacity: 0.4, marginBottom: '16px', maxWidth: '300px', wordBreak: 'break-word' }}>
@@ -65,7 +87,7 @@ export class ErrorBoundary extends Component<Props, State> {
               cursor: 'pointer',
             }}
           >
-            Перезагрузить / Reload
+            {strings.reload}
           </button>
         </div>
       )

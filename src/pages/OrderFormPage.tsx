@@ -144,9 +144,9 @@ export function OrderFormPage() {
     } catch (error) {
       try { WebApp.HapticFeedback.notificationOccurred('error') } catch {}
       try {
-        WebApp.showAlert(error instanceof Error ? error.message : 'Не удалось оформить заказ')
+        WebApp.showAlert(error instanceof Error ? error.message : t(lang, 'error_title'))
       } catch {
-        alert(error instanceof Error ? error.message : 'Error')
+        alert(error instanceof Error ? error.message : t(lang, 'error_title'))
       }
     } finally {
       setSubmitting(false)
@@ -192,7 +192,7 @@ export function OrderFormPage() {
     <Layout hideNav>
       <PageHeader
         title={t(lang, 'order_title')}
-        subtitle={`${items.length} поз. · ${formatPrice(totalPrice, currency)}`}
+        subtitle={`${items.length} ${t(lang, 'items_count')} · ${formatPrice(totalPrice, currency)}`}
       />
 
       <motion.section
