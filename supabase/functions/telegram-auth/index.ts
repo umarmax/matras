@@ -69,10 +69,10 @@ async function validateTelegramInitData(
     throw new Error('Invalid initData signature')
   }
 
-  // Check auth_date is not older than 1 hour
+  // Check auth_date is not older than 24 hours
   const authDate = Number(params.get('auth_date') ?? '0')
   const now = Math.floor(Date.now() / 1000)
-  if (now - authDate > 3600) {
+  if (now - authDate > 86400) {
     throw new Error('initData expired')
   }
 
