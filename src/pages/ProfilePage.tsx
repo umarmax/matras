@@ -11,7 +11,7 @@ import { t } from '../lib/i18n'
 import type { Order } from '../types'
 
 const CONTACT_PHONE = '+998909583231'
-const CONTACT_BOT = 'wellsleep_uzbot'
+const CONTACT_BOT = 'wellsleepuz'
 
 export function ProfilePage() {
   const { user, loading, initAuth, logout } = useAuthStore()
@@ -54,14 +54,21 @@ export function ProfilePage() {
     return () => { cancelled = true }
   }, [user, tgUser])
 
-  const displayName = user && user.id !== 'dev-user'
-    ? [user.first_name, user.last_name].filter(Boolean).join(' ')
-    : tgUser
-      ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ')
-      : null
+  // Build display name from all available sources
+  const displayName = (() => {
+    // From auth store (includes Telegram data via buildDevProfile)
+    if (user?.first_name) {
+      return [user.first_name, user.last_name].filter(Boolean).join(' ')
+    }
+    // Direct from WebApp
+    if (tgUser?.first_name) {
+      return [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ')
+    }
+    return null
+  })()
 
   const username = user?.username ?? tgUser?.username ?? null
-  const photoUrl = user?.photo_url ?? null
+  const photoUrl = user?.photo_url ?? tgUser?.photo_url ?? null
 
   const statusLabel: Record<string, string> = {
     pending: '⏳',
@@ -175,16 +182,16 @@ export function ProfilePage() {
 
       {/* Contact + Logout */}
       <section className="px-4 py-4 pb-6">
-        {/* Phone call button */}
+        {/* Contact us button - calls phone */}
         <a
           href={`tel:${CONTACT_PHONE}`}
           className="mb-2 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl text-sm font-semibold"
           style={{ background: 'var(--tg-theme-button-color)', color: 'var(--tg-theme-button-text-color)' }}
         >
-          📞 {CONTACT_PHONE}
+          📞 {t(lang, 'contact_us')} · {CONTACT_PHONE}
         </a>
 
-        {/* Telegram bot button */}
+        {/* Telegram contact button */}
         <button
           type="button"
           onClick={() => {

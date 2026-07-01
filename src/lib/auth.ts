@@ -9,12 +9,16 @@ interface TelegramAuthResponse {
 }
 
 function buildDevProfile(): UserProfile {
-  const tgUser = WebApp.initDataUnsafe.user
+  // Try multiple ways to get Telegram user data
+  let tgUser = null
+  try {
+    tgUser = WebApp.initDataUnsafe?.user
+  } catch {}
 
   return {
     id: 'dev-user',
     telegram_id: tgUser?.id ?? 0,
-    first_name: tgUser?.first_name ?? 'Гость',
+    first_name: tgUser?.first_name ?? '',
     last_name: tgUser?.last_name ?? null,
     username: tgUser?.username ?? null,
     photo_url: tgUser?.photo_url ?? null,
