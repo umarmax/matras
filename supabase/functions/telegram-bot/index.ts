@@ -284,19 +284,19 @@ Deno.serve(async (req) => {
 
     if (langCode.startsWith('uz')) {
       greeting = `✨ *Premium uyqu dunyosiga xush kelibsiz!* ✨\n\nHurmatli *${firstName}*, sizni qabul qilishdan mamnunmiz. Matras fabrikasi har qanday so'rovingizni amalga oshirishga tayyor:\n• 📐 *Bepul o'lchov* — mutaxassisimiz qulay vaqtda keladi.\n• ⚡️ *2 kunda tayyorlash* — o'z zamonaviy ishlab chiqarishimizda.\n• 🛏 *Har qanday o'lcham va to'ldirish* — klassikadan ortopedik premiumgacha.\n\n---\n\n💼 *Bevosita muloqot uchun kontaktlar:*\n📞 *Telefon:* ${MANAGER_PHONE}\n💬 *Menejer Telegram:* [Menejarga yozish](https://t.me/${MANAGER_USERNAME})\n\nInteraktiv 3D katalogimizni ochish va bir necha bosish bilan o'zingizga mos matrasni sozlash uchun quyidagi tugmani bosing! 👇`
-      btnCatalog = '🛍 3D Katalogni ochish'
+      btnCatalog = '🛍 Katalogni ochish'
       btnContact = '📞 O\'lchov ustasi bilan bog\'lanish'
     } else if (langCode.startsWith('en')) {
       greeting = `✨ *Welcome to the world of premium sleep!* ✨\n\nDear *${firstName}*, we are glad to welcome you. Our mattress factory is ready to fulfill any of your requests:\n• 📐 *Free measurement* — our specialist will come at a convenient time.\n• ⚡️ *2-day production* — at our own high-tech facility.\n• 🛏 *Any size and filling* — from classic to orthopedic premium.\n\n---\n\n💼 *Our contacts for direct communication:*\n📞 *Phone:* ${MANAGER_PHONE}\n💬 *Manager on Telegram:* [Write to manager](https://t.me/${MANAGER_USERNAME})\n\nTap the button below to open our interactive 3D catalog and configure your mattress in a few clicks! 👇`
-      btnCatalog = '🛍 Open 3D Catalog (Mini App)'
+      btnCatalog = '🛍 Open Catalog'
       btnContact = '📞 Contact measurement specialist'
     } else if (langCode.startsWith('kk') || langCode.startsWith('kz')) {
       greeting = `✨ *Премиум ұйқы әлеміне қош келдіңіз!* ✨\n\nҚұрметті *${firstName}*, сізді қабылдауға қуаныштымыз. Матрас фабрикасы кез келген сұрауыңызды орындауға дайын:\n• 📐 *Тегін өлшеу* — маманымыз ыңғайлы уақытта келеді.\n• ⚡️ *2 күнде дайындау* — өз заманауи өндірісімізде.\n• 🛏 *Кез келген өлшем* — классикадан ортопедиялық премиумға дейін.\n\n---\n\n💼 *Тікелей байланыс контактілері:*\n📞 *Телефон:* ${MANAGER_PHONE}\n💬 *Менеджер Telegram:* [Менеджерге жазу](https://t.me/${MANAGER_USERNAME})\n\nИнтерактивті 3D каталогымызды ашу үшін төмендегі түймені басыңыз! 👇`
-      btnCatalog = '🛍 3D Каталогты ашу (Mini App)'
+      btnCatalog = '🛍 Каталогты ашу'
       btnContact = '📞 Өлшеуші маманмен байланысу'
     } else {
       greeting = `✨ *Добро пожаловать в мир премиального сна!* ✨\n\nУважаемый *${firstName}*, мы рады приветствовать вас. Фабрика матрасов готова воплотить в жизнь любой ваш запрос:\n• 📐 *Бесплатный замер* — наш специалист приедет в удобное время.\n• ⚡️ *Изготовление за 2 дня* — на собственном технологичном производстве.\n• 🛏 *Любые размеры и наполнение* — от классики до ортопедического премиума.\n\n---\n\n💼 *Наши контакты для прямой связи:*\n📞 *Телефон:* ${MANAGER_PHONE}\n💬 *Менеджер в Telegram:* [Написать менеджеру](https://t.me/${MANAGER_USERNAME})\n\nНажмите на кнопку ниже, чтобы открыть наш интерактивный 3D-каталог и настроить матрас под себя за пару кликов! 👇`
-      btnCatalog = '🛍 Открыть 3D Каталог (Mini App)'
+      btnCatalog = '🛍 Открыть Каталог'
       btnContact = '📞 Связаться с замерщиком'
     }
 
