@@ -29,6 +29,20 @@ interface OrderRequest {
   comment?: string
 }
 
+// Dynamic price: identical formula to src/lib/pricing.ts (kept in sync manually).
+function calculatePrice(
+  widthCm: number,
+  lengthCm: number,
+  pricePerM2: number,
+  minimumPrice: number | null,
+): number {
+  if (widthCm <= 0 || lengthCm <= 0) return minimumPrice ?? 0
+  const areaM2 = (widthCm / 100) * (lengthCm / 100)
+  const raw = Math.round(areaM2 * pricePerM2)
+  if (minimumPrice != null && raw < minimumPrice) return minimumPrice
+  return raw
+}
+
 // HTML escape to prevent XSS
 function escapeHtml(text: string): string {
   const map: Record<string, string> = {
@@ -180,11 +194,11 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Validate items and calculate total from database prices
+    // Validate items and calculate total from database (dynamic per-m² pricing)
     const productIds = body.items.map((item) => item.product_id)
     const { data: products, error: productsError } = await supabase
       .from('products')
-      .select('id, name, price, width_options, length_options')
+      .select('id, name, price, category, width_options, length_options')
       .in('id', productIds)
 
     if (productsError) {
@@ -203,6 +217,20 @@ Deno.serve(async (req) => {
 
     // Build product map
     const productMap = new Map(products.map((p) => [p.id, p]))
+
+    // Load pricing for every category referenced by the ordered products
+    const categorySlugs = [...new Set(products.map((p) => p.category))]
+    const { data: categories, error: categoriesError } = await supabase
+      .from('categories')
+      .select('slug, price_per_m2, minimum_price, active')
+      .in('slug', categorySlugs)
+
+    if (categoriesError) {
+      throw new Error(`Failed to fetch categories: ${categoriesError.message}`)
+    }
+    const categoryMap = new Map(
+      (categories ?? []).map((c) => [c.slug, c]),
+    )
 
     // Validate each item and calculate real total
     let calculatedTotal = 0
@@ -245,9 +273,25 @@ Deno.serve(async (req) => {
         )
       }
 
-      // Calculate price from database (not from client!)
-      const itemTotal = product.price * item.quantity
-      calculatedTotal += itemTotal
+      // Dynamic price from category pricing (never trust the client).
+      const category = categoryMap.get(product.category)
+      if (!category || category.active === false) {
+        return new Response(
+          JSON.stringify({ error: `Category unavailable for product ${item.product_id}` }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          },
+        )
+      }
+
+      const unitPrice = calculatePrice(
+        item.width,
+        item.length,
+        category.price_per_m2,
+        category.minimum_price ?? null,
+      )
+      calculatedTotal += unitPrice * item.quantity
 
       validatedItems.push({
         product_id: item.product_id,
@@ -255,7 +299,7 @@ Deno.serve(async (req) => {
         width: item.width,
         length: item.length,
         quantity: item.quantity,
-        price: product.price, // Use database price
+        price: unitPrice, // Server-computed unit price (UZS)
       })
     }
 

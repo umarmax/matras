@@ -11,6 +11,7 @@ import { WebApp } from '../lib/telegram'
 import { useAppStore } from '../store/appStore'
 import { useCartStore } from '../store/cartStore'
 import { useSettingsStore, formatPrice } from '../store/settingsStore'
+import { calculatePrice } from '../lib/pricing'
 import { t } from '../lib/i18n'
 import type { Product } from '../types'
 
@@ -18,6 +19,9 @@ export function ProductPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const getProductById = useAppStore((s) => s.getProductById)
+  const loadCategories = useAppStore((s) => s.loadCategories)
+  const getPricingForCategory = useAppStore((s) => s.getPricingForCategory)
+  const categories = useAppStore((s) => s.categories)
   const addItem = useCartStore((s) => s.addItem)
   const lang = useSettingsStore((s) => s.language)
   const currency = useSettingsStore((s) => s.currency)
@@ -28,6 +32,10 @@ export function ProductPage() {
   const [length, setLength] = useState(200)
 
   useTelegramBackButton(true, '/catalog')
+
+  useEffect(() => {
+    void loadCategories()
+  }, [loadCategories])
 
   useEffect(() => {
     if (!id) return
@@ -48,9 +56,16 @@ export function ProductPage() {
     return () => { cancelled = true }
   }, [id, getProductById])
 
+  // Live price from selected dimensions + category pricing.
+  // `categories` in deps so the price recomputes once categories load.
+  const unitPrice = product
+    ? calculatePrice(width, length, getPricingForCategory(product.category))
+    : 0
+  void categories
+
   const handleAddToCart = () => {
     if (!product) return
-    addItem(product, width, length)
+    addItem(product, width, length, unitPrice)
     try {
       WebApp.HapticFeedback.impactOccurred('medium')
       WebApp.showConfirm(
@@ -85,7 +100,7 @@ export function ProductPage() {
     <Layout hideNav>
       <PageHeaderWithBack
         title={product.name}
-        subtitle={formatPrice(product.price, currency)}
+        subtitle={formatPrice(unitPrice, currency)}
         onBack={() => navigate(-1)}
       />
 
@@ -133,7 +148,7 @@ export function ProductPage() {
           className="flex min-h-[52px] w-full items-center justify-center rounded-2xl text-base font-semibold"
           style={{ background: 'var(--tg-theme-button-color)', color: 'var(--tg-theme-button-text-color)' }}
         >
-          {t(lang, 'add_to_cart')} · {formatPrice(product.price, currency)}
+          {t(lang, 'add_to_cart')} · {formatPrice(unitPrice, currency)}
         </motion.button>
       </div>
     </Layout>

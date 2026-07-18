@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import type { Order, OrderPayload, Product } from '../types'
+import type { MattressCategory, Order, OrderPayload, Product } from '../types'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -16,6 +16,20 @@ export const supabase = createClient(
   supabaseUrl ?? 'https://placeholder.supabase.co',
   supabaseAnonKey ?? 'placeholder-key',
 )
+
+export async function fetchCategories(): Promise<MattressCategory[]> {
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .eq('active', true)
+    .order('sort_order', { ascending: true })
+
+  if (error) {
+    throw new Error(`Не удалось загрузить категории: ${error.message}`)
+  }
+
+  return (data ?? []) as MattressCategory[]
+}
 
 export async function fetchProducts(): Promise<Product[]> {
   const { data, error } = await supabase

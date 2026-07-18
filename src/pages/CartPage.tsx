@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { Layout } from '../components/Layout'
 import { PageHeader } from '../components/PageHeader'
 import { WebApp } from '../lib/telegram'
-import { useCartStore } from '../store/cartStore'
+import { useCartStore, itemUnitPrice } from '../store/cartStore'
 import { useSettingsStore, formatPrice } from '../store/settingsStore'
 import { t } from '../lib/i18n'
 
@@ -68,7 +68,7 @@ export function CartPage() {
                     </p>
                   </div>
                   <p className="shrink-0 text-sm font-semibold" style={{ color: 'var(--tg-theme-accent-text-color)' }}>
-                    {formatPrice(item.product.price * item.quantity, currency)}
+                    {formatPrice(itemUnitPrice(item) * item.quantity, currency)}
                   </p>
                 </div>
 

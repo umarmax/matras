@@ -8,7 +8,6 @@ import type { ThemeMode, Currency } from '../store/settingsStore'
 
 const CURRENCIES: { code: Currency; label: string; symbol: string }[] = [
   { code: 'UZS', label: "So'm", symbol: "so'm" },
-  { code: 'RUB', label: 'Рубль', symbol: '₽' },
   { code: 'USD', label: 'Dollar', symbol: '$' },
   { code: 'EUR', label: 'Euro', symbol: '€' },
 ]

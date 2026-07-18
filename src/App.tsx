@@ -9,8 +9,10 @@ import { OrderFormPage } from './pages/OrderFormPage'
 import { ProductPage } from './pages/ProductPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { SettingsPage } from './pages/SettingsPage'
+import { AdminPage } from './pages/AdminPage'
 import { useSettingsStore } from './store/settingsStore'
 import { useAuthStore } from './store/authStore'
+import { useAppStore } from './store/appStore'
 import { WebApp } from './lib/telegram'
 
 function ThemeManager() {
@@ -67,6 +69,8 @@ function AnimatedRoutes() {
         <Route path="/order" element={<OrderFormPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin/:tab" element={<AdminPage />} />
       </Routes>
     </AnimatePresence>
   )
@@ -74,9 +78,11 @@ function AnimatedRoutes() {
 
 function AuthInit() {
   const initAuth = useAuthStore((s) => s.initAuth)
+  const loadCategories = useAppStore((s) => s.loadCategories)
   useEffect(() => {
     void initAuth()
-  }, [initAuth])
+    void loadCategories()
+  }, [initAuth, loadCategories])
   return null
 }
 

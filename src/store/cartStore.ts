@@ -8,6 +8,7 @@ interface CartState {
     product: Product,
     width: number,
     length: number,
+    unitPrice: number,
     quantity?: number,
   ) => void
   removeItem: (id: string) => void
@@ -15,6 +16,11 @@ interface CartState {
   clearCart: () => void
   totalItems: () => number
   totalPrice: () => number
+}
+
+// Backward-compatible unit price for carts persisted before dynamic pricing.
+export function itemUnitPrice(item: CartItem): number {
+  return item.unitPrice ?? item.product.price
 }
 
 function makeCartItemId(productId: string, width: number, length: number) {
@@ -26,7 +32,7 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
 
-      addItem: (product, width, length, quantity = 1) => {
+      addItem: (product, width, length, unitPrice, quantity = 1) => {
         const id = makeCartItemId(product.id, width, length)
         const existing = get().items.find((item) => item.id === id)
 
@@ -34,7 +40,7 @@ export const useCartStore = create<CartState>()(
           set({
             items: get().items.map((item) =>
               item.id === id
-                ? { ...item, quantity: item.quantity + quantity }
+                ? { ...item, quantity: item.quantity + quantity, unitPrice }
                 : item,
             ),
           })
@@ -44,7 +50,7 @@ export const useCartStore = create<CartState>()(
         set({
           items: [
             ...get().items,
-            { id, productId: product.id, product, width, length, quantity },
+            { id, productId: product.id, product, width, length, quantity, unitPrice },
           ],
         })
       },
@@ -73,7 +79,7 @@ export const useCartStore = create<CartState>()(
 
       totalPrice: () =>
         get().items.reduce(
-          (sum, item) => sum + item.product.price * item.quantity,
+          (sum, item) => sum + itemUnitPrice(item) * item.quantity,
           0,
         ),
     }),

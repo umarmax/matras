@@ -13,12 +13,36 @@ export interface Product {
   created_at: string
 }
 
+// Lightweight category used by the home-screen chips (icon comes from the frontend).
 export interface Category {
   id: string
   name: string
   slug: string
   icon: string
   description: string
+}
+
+// Full mattress category with dynamic pricing, backed by the `categories` table.
+export interface MattressCategory {
+  id: string
+  slug: string
+  name: string
+  description: string | null
+  image_url: string | null
+  active: boolean
+  price_per_m2: number
+  minimum_price: number | null
+  sort_order: number
+}
+
+export type AdminRole = 'owner' | 'sales_manager'
+
+export interface Admin {
+  telegram_user_id: number
+  name: string | null
+  role: AdminRole
+  active: boolean
+  created_at?: string
 }
 
 export interface CartItem {
@@ -28,6 +52,7 @@ export interface CartItem {
   width: number
   length: number
   quantity: number
+  unitPrice: number // computed from category pricing at add-time (UZS)
 }
 
 export interface OrderPayload {
@@ -48,16 +73,28 @@ export interface OrderPayload {
   comment?: string
 }
 
+export type OrderStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'in_production'
+  | 'ready'
+  | 'delivered'
+  | 'cancelled'
+  | 'completed' // legacy
+
 export interface Order {
   id: string
   user_id: string | null
   items: OrderPayload['items']
   total: number
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
+  status: OrderStatus
+  telegram_user_id?: number | null
+  telegram_username?: string | null
   customer_name: string | null
   customer_phone: string | null
   delivery_address: string | null
   comment: string | null
+  admin_note?: string | null
   created_at: string
 }
 

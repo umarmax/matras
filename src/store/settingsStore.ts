@@ -3,36 +3,37 @@ import { persist } from 'zustand/middleware'
 import type { Language } from '../lib/i18n'
 
 export type ThemeMode = 'auto' | 'light' | 'dark'
-export type Currency = 'UZS' | 'RUB' | 'USD' | 'EUR'
+export type Currency = 'UZS' | 'USD' | 'EUR'
 
-// Exchange rates relative to UZS (approximate)
+// Exchange rates relative to UZS (approximate). UZS is the base currency.
 export const EXCHANGE_RATES: Record<Currency, number> = {
   UZS: 1,
-  RUB: 0.0083,   // 1 UZS ≈ 0.0083 RUB
   USD: 0.000079, // 1 UZS ≈ 0.000079 USD
   EUR: 0.000073, // 1 UZS ≈ 0.000073 EUR
 }
 
 export const CURRENCY_SYMBOLS: Record<Currency, string> = {
   UZS: "so'm",
-  RUB: '₽',
   USD: '$',
   EUR: '€',
 }
 
+// Normalize any persisted/legacy currency (e.g. removed 'RUB') back to UZS.
+function normalizeCurrency(currency: Currency): Currency {
+  return currency in EXCHANGE_RATES ? currency : 'UZS'
+}
+
 // Product prices are stored in UZS in the database
 export function convertPrice(priceInUZS: number, currency: Currency): number {
-  return Math.round(priceInUZS * EXCHANGE_RATES[currency])
+  return Math.round(priceInUZS * EXCHANGE_RATES[normalizeCurrency(currency)])
 }
 
 export function formatPrice(priceInUZS: number, currency: Currency): string {
-  const converted = convertPrice(priceInUZS, currency)
-  const symbol = CURRENCY_SYMBOLS[currency]
-  
-  if (currency === 'UZS') {
-    return `${converted.toLocaleString('ru-RU')} ${symbol}`
-  }
-  if (currency === 'USD' || currency === 'EUR') {
+  const cur = normalizeCurrency(currency)
+  const converted = convertPrice(priceInUZS, cur)
+  const symbol = CURRENCY_SYMBOLS[cur]
+
+  if (cur === 'USD' || cur === 'EUR') {
     return `${symbol}${converted.toLocaleString('en-US', { minimumFractionDigits: 0 })}`
   }
   return `${converted.toLocaleString('ru-RU')} ${symbol}`

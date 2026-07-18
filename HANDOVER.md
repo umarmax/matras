@@ -121,7 +121,7 @@ curl "https://api.telegram.org/bot<BOT_TOKEN>/deleteWebhook"
 - Auto-detects user's Telegram language (uz/ru/en/kk)
 - Shows premium welcome message with contact info
 - Two inline buttons:
-  - "🛍 Open 3D Catalog" → opens Mini App
+  - "🛍 " → opens Mini App
   - "📞 Contact specialist" → opens @wellsleepuz
 
 ---

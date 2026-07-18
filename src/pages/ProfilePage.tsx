@@ -5,12 +5,15 @@ import { Layout } from '../components/Layout'
 import { PageHeader } from '../components/PageHeader'
 import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
+import { useAdminStore } from '../store/adminStore'
 import { useSettingsStore, formatPrice } from '../store/settingsStore'
 import { t } from '../lib/i18n'
 import type { Order } from '../types'
 
 export function ProfilePage() {
   const { initAuth } = useAuthStore()
+  const adminRole = useAdminStore((s) => s.role)
+  const checkAdmin = useAdminStore((s) => s.checkAdmin)
   const [orders, setOrders] = useState<Order[]>([])
   const [ordersLoading, setOrdersLoading] = useState(false)
   const lang = useSettingsStore((s) => s.language)
@@ -27,7 +30,8 @@ export function ProfilePage() {
 
   useEffect(() => {
     void initAuth()
-  }, [initAuth])
+    void checkAdmin()
+  }, [initAuth, checkAdmin])
 
   // Load orders by phone
   useEffect(() => {
@@ -81,6 +85,9 @@ export function ProfilePage() {
   const statusLabel: Record<string, string> = {
     pending: '⏳',
     confirmed: '✅',
+    in_production: '🏭',
+    ready: '📦',
+    delivered: '🎉',
     completed: '🎉',
     cancelled: '❌',
   }
@@ -101,6 +108,23 @@ export function ProfilePage() {
           <span style={{ color: 'var(--tg-theme-hint-color)' }}>›</span>
         </button>
       </section>
+
+      {/* Admin Panel — rendered only for verified admins (backend-validated). */}
+      {adminRole && (
+        <section className="px-4 pb-4">
+          <button
+            type="button"
+            onClick={() => navigate('/admin')}
+            className="flex min-h-[48px] w-full items-center justify-between rounded-2xl px-4 text-sm font-semibold"
+            style={{ background: 'var(--tg-theme-button-color)', color: 'var(--tg-theme-button-text-color)' }}
+          >
+            <span>🛠 {t(lang, 'admin_panel')}</span>
+            <span style={{ opacity: 0.7 }}>
+              {adminRole === 'owner' ? t(lang, 'role_owner') : t(lang, 'role_manager')} ›
+            </span>
+          </button>
+        </section>
+      )}
 
       {/* Phone login to see orders */}
       {!loggedInPhone ? (

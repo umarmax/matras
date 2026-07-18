@@ -1,0 +1,61 @@
+import type { MattressCategory } from '../types'
+
+// Fallback categories used when Supabase is unreachable / not configured.
+// Prices mirror the seed in supabase/migrations/0001_dynamic_pricing_and_admin.sql (UZS).
+export const MOCK_CATEGORIES: MattressCategory[] = [
+  {
+    id: 'cat-orthopedic',
+    slug: 'orthopedic',
+    name: 'Ортопедические',
+    description: 'Матрасы с независимым пружинным блоком для здорового сна',
+    image_url: null,
+    active: true,
+    price_per_m2: 1500000,
+    minimum_price: 2000000,
+    sort_order: 1,
+  },
+  {
+    id: 'cat-spring',
+    slug: 'spring',
+    name: 'Пружинные',
+    description: 'Классический пружинный комфорт',
+    image_url: null,
+    active: true,
+    price_per_m2: 1000000,
+    minimum_price: 1500000,
+    sort_order: 2,
+  },
+  {
+    id: 'cat-foam',
+    slug: 'foam',
+    name: 'Беспружинные',
+    description: 'Пена с эффектом памяти формы',
+    image_url: null,
+    active: true,
+    price_per_m2: 1300000,
+    minimum_price: 1800000,
+    sort_order: 3,
+  },
+  {
+    id: 'cat-kids',
+    slug: 'kids',
+    name: 'Детские',
+    description: 'Гипоаллергенные матрасы с усиленной поддержкой',
+    image_url: null,
+    active: true,
+    price_per_m2: 900000,
+    minimum_price: 1000000,
+    sort_order: 4,
+  },
+  {
+    id: 'cat-custom',
+    slug: 'custom',
+    name: 'На заказ',
+    description: 'Матрас любого размера, изготовление за 2 дня',
+    image_url: null,
+    active: true,
+    price_per_m2: 1800000,
+    minimum_price: 2500000,
+    sort_order: 5,
+  },
+]

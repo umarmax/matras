@@ -51,6 +51,11 @@ interface TelegramChat {
   type: string
 }
 
+// Format an amount in Uzbek som for Telegram messages.
+function formatUzs(amount: number): string {
+  return `${Math.round(amount).toLocaleString('ru-RU')} so'm`
+}
+
 // HTML escape to prevent XSS in Telegram messages
 function escapeHtml(text: string): string {
   const map: Record<string, string> = {
@@ -149,14 +154,14 @@ async function notifyAdminNewOrder(
   const itemLines = order.items
     .map(
       (i) =>
-        `  • ${escapeHtml(i.name)} ${i.width}×${i.length} см × ${i.quantity} шт — ${(i.price * i.quantity).toLocaleString('ru')} ₽`,
+        `  • ${escapeHtml(i.name)} ${i.width}×${i.length} см × ${i.quantity} шт — ${formatUzs(i.price * i.quantity)}`,
     )
     .join('\n')
 
   const text = [
     `🛏 <b>Новый заказ #${order.id.slice(0, 8)}</b>`,
     '',
-    `💰 <b>Итого:</b> ${order.total.toLocaleString('ru')} ₽`,
+    `💰 <b>Итого:</b> ${formatUzs(order.total)}`,
     '',
     `👤 <b>Клиент:</b> ${safeName}`,
     safePhone ? `📞 <b>Телефон:</b> ${safePhone}` : null,
